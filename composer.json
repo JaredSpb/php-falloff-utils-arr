@@ -1,4 +1,7 @@
 {
+    "name": "JaredSpb/php-falloff-utils-arr",
+    "description": "ArrayObject implementation plus a bunch of features",
+    "type": "library",
     "autoload": {
         "classmap": [
             "lib/"
@@ -6,5 +9,16 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9"
-    }
+    },
+    "require": {
+        "php": ">=7.3.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+          "name": "Jared",
+          "email": "jared@falloff.ru"
+        }
+    ],
+    "minimum-stability": "dev"
 }
