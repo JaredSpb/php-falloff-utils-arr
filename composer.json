@@ -1,5 +1,5 @@
 {
-    "name": "JaredSpb/php-falloff-utils-arr",
+    "name": "jared/php-falloff-utils-arr",
     "description": "ArrayObject implementation plus a bunch of features",
     "type": "library",
     "autoload": {
