@@ -297,7 +297,7 @@ final class ArrTest extends TestCase
         $this->assertEquals( $tree['structure'], $cmp_structure );
 
         // With id's
-        $tree = Arr::array_as_tree( $raw, 'id', 'parent_id', null );
+        $tree = Arr::array_as_tree( $raw, [ 'id_key' => 'id', 'pid_key' => 'parent_id', 'alias_key' => null ], null );
 
         $this->assertEquals( array_keys( $tree ), $cmp[ 'nonaliased' ]['keys'] );
         $this->assertEquals( $tree['orphans'], $cmp[ 'nonaliased' ]['orphans'] );
@@ -339,11 +339,12 @@ final class ArrTest extends TestCase
         ];
 
         $arr = new Arr( $raw );
-        $tree = $arr->asTree( 'ID', 'PID', 'alias', '__CHILDREN__' );
+        $tree = $arr->asTree( ['id_key' => 'ID', 'pid_key' => 'PID', 'alias_key' => 'alias', 'children_key' => '__CHILDREN__'] );
 
         $this->assertEquals( array_keys( $tree->getArrayCopy() ), $cmp['keys'] );
         $this->assertEquals( $tree['orphans'], $cmp['orphans'] );
         $this->assertEquals( $tree['roots']->hasKey('root1'), true );
+
         $this->assertEquals( $tree['roots'][ 'root1' ], $cmp['first_root'] );
         $this->assertEquals( $tree['structure'], $cmp_structure );
 

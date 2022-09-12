@@ -797,7 +797,7 @@ class Arr extends ArrBase {
 	* - structure - plain `id => parent_id` array
 	* - orphans - contains elements who's parent was not found
 	*
-	* Every non-childless element will have a `_children` (changable) key, containing
+	* Every non-childless element will have a `_children` (by default) key, containing
 	* its children. These children are indexed via their `$alias_key` value. Or indexed
 	* by a plain integer if `$alias_key` was not defined or the particular element does not 
 	* have it;
@@ -868,31 +868,25 @@ class Arr extends ArrBase {
 	* 	],
 	* ]
 	* ```
-	* 
-	* 
+	* @param string $params an array defining element's structure, might have following keys
+	* - `id_key => 'id'` string, the key holding element's id
+	* - `pid_key => 'parent_id'` string, the key holding element's parent id
+	* - `alias => 'name'` string or null, the key holding an alias that will be used in a children array
+	* - `children_key => '_children'` string, the key holding element's id
 	*
-	* @param string $id_key the key holding element's id
-	* @param string $pid_key the key holding element's parent id
-	* @param string $alias the key holding an alias that will be used in a children array
-	* @param string $children_key this string will be used as a key for children array
-	* @param string $collection_class will be used as a container class for all the elements
+	* @param string $collection_class will be used as a container class for all the elements. 
+	* Arr instances will use the Arr by default.
 	*
 	* @group Subarrays
 	*/
 
 	function asTree( 
-			string $id_key = 'id', 
-			string $pid_key = 'parent_id', 
-			?string $alias_key = 'name', 
-			string $children_key = '_children',
+			array $params = [],
 			string $collection_class = null			
 		) : Arr {
 		return self::array_as_tree(
 			$this->storage,
-			$id_key,
-			$pid_key,
-			$alias_key,
-			$children_key,
+			$params,
 			__CLASS__
 		);
 	}
@@ -901,13 +895,22 @@ class Arr extends ArrBase {
 	* @see Arr::asTree()
 	*/
 	static function array_as_tree(
-			array $array, 
-			string $id_key = 'id', 
-			string $pid_key = 'parent_id', 
-			?string $alias_key = 'name', 
-			string $children_key = '_children',
-			string $collection_class = null
+		array $array, 
+		array $params = [],
+		string $collection_class = null
 	){
+		$defaults = [
+			'id_key' => 'id', 
+			'pid_key' => 'parent_id', 
+			'alias_key' => 'name', 
+			'children_key' => '_children',
+		];
+		foreach( $defaults as $param => $default_value ){
+			if( !array_key_exists($param, $params) )
+				$params[ $param ] = $default_value;
+		}
+		extract( $params );
+
 		$results = [];
 		$helper_vars = ['all', 'roots', 'orphans', 'structure'];
 		foreach( $helper_vars as $k )
