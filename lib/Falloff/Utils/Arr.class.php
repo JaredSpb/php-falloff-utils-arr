@@ -798,9 +798,9 @@ class Arr extends ArrBase {
 	* - orphans - contains elements who's parent was not found
 	*
 	* Every non-childless element will have a `_children` (by default) key, containing
-	* its children. These children are indexed via their `$alias_key` value. Or indexed
-	* by a plain integer if `$alias_key` was not defined or the particular element does not 
-	* have it;
+	* its children. These children are indexed via their `$params['alias_key']` value. 
+	* If `$params['alias_key']` was set to null, children will be indexed by a plain int key.
+	* If a particular element does not have a `$params['alias_key']`, it will be indexed by it's id.
 	*  
 	* ```php
 	* $raw = [
