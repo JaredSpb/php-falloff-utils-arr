@@ -4,7 +4,7 @@
 
 * @package Falloff\Utils\Arr
 * @license MIT
-* @version 1.0.1 (2022-09-13)
+* @version 1.0.2 (2022-09-13)
 * @author Jared <jared@falloff.com>
 */
 
