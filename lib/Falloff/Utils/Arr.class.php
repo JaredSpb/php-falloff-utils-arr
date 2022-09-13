@@ -4,21 +4,21 @@
 
 * @package Falloff\Utils\Arr
 * @license MIT
-* @version 1.0 (2022-09-07)
+* @version 1.0.1 (2022-09-13)
 * @author Jared <jared@falloff.com>
 */
 
 namespace Falloff\Utils;
 
 /**
-* Base class providing trivial ArrayAccess, Countable, Serializable and IteratorAggregate implementation.
+* Base class providing trivial ArrayAccess, Countable and IteratorAggregate implementation.
 * 
 * Using `ArrBase` by it's own does not make much sense. There are two differences from the built-in
 * `\ArrayObject` class. First is that inner storage is marked as `protected` so that ArrBase can be extended.
 * And the second is the `ArrBase::raw()` method that returns internal storage by reference. But using the last is
 * NOT recommended.
 */
-class ArrBase implements \ArrayAccess, \Countable, \Serializable, \IteratorAggregate {
+class ArrBase implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 	/**
 	* @internal
@@ -43,7 +43,7 @@ class ArrBase implements \ArrayAccess, \Countable, \Serializable, \IteratorAggre
 
 	// ArrayAccess
 	function offsetExists($offset) : bool { return array_key_exists($offset, $this->storage); }
-	function offsetGet($offset){ return $this->storage[$offset]; }
+	function offsetGet($offset) : mixed { return $this->storage[$offset]; }
 	function offsetSet($offset, $value) : void { 
 		if( is_null($offset) ) $offset = count( $this->storage );
 		$this->storage[$offset] = $value; 
@@ -52,9 +52,7 @@ class ArrBase implements \ArrayAccess, \Countable, \Serializable, \IteratorAggre
 	function offsetUnset($offset) : void { unset($this->storage[$offset]); }
 	// Countable
 	function count() : int { return count( $this->storage ); }
-	// Serializable
-	function serialize() : string { return serialize( $this->storage ); }
-	function unserialize($data) : void { $this->storage = unserialize( $data ); }
+
 	// IteratorAggregate
 	function getIterator() : \ArrayIterator { return new \ArrayIterator( $this->storage ); }
 
@@ -72,11 +70,6 @@ class ArrBase implements \ArrayAccess, \Countable, \Serializable, \IteratorAggre
 * When a static method returns an array, instance method returns a `new Arr` instance.
 */
 class Arr extends ArrBase {
-
-	/**
-	* @internal
-	*/
-	protected $first_key = null;
 
 	/**
 	* @internal
@@ -276,6 +269,7 @@ class Arr extends ArrBase {
 	function first() {
 		return self::array_first( $this->storage );
 	}
+
 	/**
 	@see Arr::first()
 	*/
@@ -283,6 +277,36 @@ class Arr extends ArrBase {
 		$keys = array_keys( $array );
 		return $array[ $keys[0] ];
 	}
+
+
+	/**
+	* Returns the last value, no matter if the array is a list or a hash.
+	* ```php
+	* (new Arr([1,2,3]))
+	* 	->last(); // returns 3
+	* 
+	* (new Arr(['first' => 1, 'second' => 2, 'third' =>3]))
+	* 	->last(); // returns 3
+	*
+	* Arr::array_last([1,2,3]); // returns 3
+	* Arr::array_last(['first' => 1, 'second' => 2, 'third' =>3]); // returns 3
+	* ```
+	*
+	* @group Getters
+	*/
+
+	function last() {
+		return self::array_last( $this->storage );
+	}
+	
+	/**
+	@see Arr::last()
+	*/
+	static function array_last( array $array ) {
+		$keys = array_keys( $array );
+		return $array[ $keys[ count( $keys ) - 1] ];
+	}
+
 
 	/**
 	* Checks if all array values satisfy a crtiteria provided.
