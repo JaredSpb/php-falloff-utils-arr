@@ -1,6 +1,7 @@
 <?php 
 use PHPUnit\Framework\TestCase;
 use \Falloff\Utils\Arr;
+use \Falloff\Utils\ArrIsEmptyException;
 
 final class ArrTest extends TestCase
 {
@@ -77,6 +78,31 @@ final class ArrTest extends TestCase
 
         $this->assertEquals( $arr->first(), 0 );
         $this->assertEquals( Arr::array_first($raw), 0 );
+
+        $this->expectException(ArrIsEmptyException::class);
+        (new Arr())->last();
+    }
+
+    public function testLast(): void
+    {
+        $raw = [0,1,2];
+        $arr = new Arr( $raw );
+
+        $this->assertEquals( $arr->last(), 2 );
+        $this->assertEquals( Arr::array_last($raw), 2 );
+
+        $this->expectException(ArrIsEmptyException::class);
+        (new Arr())->last();
+
+    }
+
+    public function testHas(): void
+    {
+        $raw = [0,1,2];
+        $arr = new Arr( $raw );
+
+        $this->assertEquals( $arr->has(1), true );
+        $this->assertEquals( $arr->has(4), false );
     }
 
     public function testAll(): void

@@ -10,6 +10,7 @@
 
 namespace Falloff\Utils;
 
+
 /**
 * Base class providing trivial ArrayAccess, Countable and IteratorAggregate implementation.
 * 
@@ -230,9 +231,26 @@ class Arr extends ArrBase {
 	* ```
 	*
 	* @group Basic
+	* @group Checks
 	*/
 	function hasKey( $key ) : bool {
 		return array_key_exists($key, $this->storage);
+	}
+
+	/**
+	* Replacement for an `in_array` built-in function
+	*
+	* ```php
+	* $array = new Arr(['one' => 1, 'two' => 2, 'three' => 3]);
+	* $array->has(1); // true
+	* $array->hasKey(4); // false
+	* ```
+	*
+	* @group Basic
+	* @group Checks
+	*/
+	function has( $value ) : bool {
+		return in_array($value, $this->storage);
 	}
 
 	/**
@@ -250,6 +268,7 @@ class Arr extends ArrBase {
 		return empty($this->storage);
 	}
 
+
 	/**
 	* Returns the first value, no matter if the array is a list or a hash.
 	* ```php
@@ -263,6 +282,8 @@ class Arr extends ArrBase {
 	* Arr::array_first(['first' => 1, 'second' => 2, 'third' =>3]); // returns 1
 	* ```
 	*
+	* @throws ArrIsEmptyException when trying to fetch a value from an empty array
+	*
 	* @group Getters
 	*/
 
@@ -274,6 +295,8 @@ class Arr extends ArrBase {
 	@see Arr::first()
 	*/
 	static function array_first( array $array ) {
+		if( empty( $array ) )
+			throw new ArrIsEmptyException( "Cannot get a first value in the empty array" );
 		$keys = array_keys( $array );
 		return $array[ $keys[0] ];
 	}
@@ -292,17 +315,21 @@ class Arr extends ArrBase {
 	* Arr::array_last(['first' => 1, 'second' => 2, 'third' =>3]); // returns 3
 	* ```
 	*
+	* @throws ArrIsEmptyException when trying to fetch a value from an empty array
+	*
 	* @group Getters
 	*/
 
 	function last() {
 		return self::array_last( $this->storage );
 	}
-	
+
 	/**
 	@see Arr::last()
 	*/
 	static function array_last( array $array ) {
+		if( empty( $array ) )
+			throw new ArrIsEmptyException( "Cannot get a last value in the empty array" );
 		$keys = array_keys( $array );
 		return $array[ $keys[ count( $keys ) - 1] ];
 	}
@@ -368,6 +395,9 @@ class Arr extends ArrBase {
 	* (new Arr([1,2,3]))->randomValue(); // one of values selected by rand()
 	* Arr::array_random_value([1,2,3]);  // one of values selected by rand()
 	* ```
+	* 
+	* @throws ArrIsEmptyException when trying to fetch a value from an empty array
+	*
 	* @group Getters
 	*/
 	function randomValue() {
@@ -375,7 +405,7 @@ class Arr extends ArrBase {
 	}
 	static function array_random_value( array $arr ) {
 		if( empty( $arr ) )
-			throw new \Exception( "Cannot find a random value in the empty array" );
+			throw new ArrIsEmptyException( "Cannot find a random value in the empty array" );
 
 		$keys = array_keys($arr);
 		return $arr[ $keys[ rand(0,count($keys) - 1) ] ];
@@ -538,7 +568,8 @@ class Arr extends ArrBase {
 	* 	[ 'key3', 'key1' ]
 	* ); // returns plain array with the same data as in the previous example
 	*
-	* @group Reducers, Subarrays
+	* @group Reducers
+	* @group Subarrays
 	*/
 	function kslice( ...$keys ) {
 		return new Arr(self::array_kslice( $this->storage, ...$keys ));
@@ -597,17 +628,17 @@ class Arr extends ArrBase {
 	* @param callable $fn 
 	* Takes $value and $key as arguments. 
 	*
-	* Must return null (what means "throw this element away").
-	*
-	* Or an array with the following elements:
+	* Must return an array with the following elements:	* 
 	* - 0 - group name, mandatory
 	* - 1 - group element key. If omited, the original key will be used. Optional.
 	* - 2 - group element value If omited, the original value will be used. Optional.
+	* Might return null instead (what means "throw this element away").
 	*
 	* Or a string representing group name (key and value will be preserved). This is the same as
 	* above with one-element array.
 	*
-	* @group Reducers, Subarrays
+	* @group Reducers
+	* @group Subarrays
 	*/
 
 	function group( callable $fn) : Arr {
@@ -1129,7 +1160,8 @@ class Arr extends ArrBase {
 	*
 	* @param $key mixed
 	*
-	* @group Reducers, Subarrays
+	* @group Reducers
+	* @group Subarrays
 	*/
 
 	function extractValues( string $key ){
@@ -1200,3 +1232,14 @@ class Arr extends ArrBase {
 	}
 
 }
+
+
+
+/**
+* Arr exceptions base
+*/
+class ArrException extends \Exception{}
+/**
+* Exceptions to be thrown on meaningless operations on an empty array
+*/
+class ArrIsEmptyException extends ArrException{}
