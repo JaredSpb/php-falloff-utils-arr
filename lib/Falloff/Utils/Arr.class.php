@@ -271,12 +271,13 @@ class Arr extends ArrBase {
 
 	/**
 	* Returns the first value, no matter if the array is a list or a hash.
+	* Accepts optional callable filter. If filter provided, returns the first entry matched by the filter (truthy returned)
+	* Accepts optional 'not_found' which will be returned if filter failed to find an entry.
+	*
 	* ```php
-	* (new Arr([1,2,3]))
-	* 	->first(); // returns 1
+	* (new Arr([1,2,3]))->first(); // returns 1
 	* 
-	* (new Arr(['first' => 1, 'second' => 2, 'third' =>3]))
-	* 	->first(); // returns 1
+	* (new Arr(['first' => 1, 'second' => 2, 'third' =>3]))->first(); // returns 1
 	*
 	* Arr::array_first([1,2,3]); // returns 1
 	* Arr::array_first(['first' => 1, 'second' => 2, 'third' =>3]); // returns 1
@@ -287,18 +288,27 @@ class Arr extends ArrBase {
 	* @group Getters
 	*/
 
-	function first() {
-		return self::array_first( $this->storage );
+	function first( ?callable $filter = null, $not_found = null ) {
+		return self::array_first( $this->storage, $filter );
 	}
 
 	/**
 	@see Arr::first()
 	*/
-	static function array_first( array $array ) {
+	static function array_first( array $array, ?callable $filter = null, $not_found = null  ) {
 		if( empty( $array ) )
 			throw new ArrIsEmptyException( "Cannot get a first value in the empty array" );
-		$keys = array_keys( $array );
-		return $array[ $keys[0] ];
+
+		if( !empty( $filter ) ){
+			foreach( $array as $entry ){
+				if( $filter( $entry ) )
+					return $entry;
+			}
+			return $not_found;
+
+		} else {
+			return $array[ array_key_first($array) ];
+		}
 	}
 
 
@@ -330,8 +340,7 @@ class Arr extends ArrBase {
 	static function array_last( array $array ) {
 		if( empty( $array ) )
 			throw new ArrIsEmptyException( "Cannot get a last value in the empty array" );
-		$keys = array_keys( $array );
-		return $array[ $keys[ count( $keys ) - 1] ];
+		return $array[ array_key_last( $array ) ];
 	}
 
 
@@ -1145,6 +1154,9 @@ class Arr extends ArrBase {
 
 
 	/**
+
+	TODO:: deprecated in favor of `array_column` builtin
+
 	* Extracts a particular value from subarrays and returns
 	* and array built from those values.
 	*
